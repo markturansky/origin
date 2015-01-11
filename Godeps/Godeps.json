@@ -398,6 +398,11 @@
 			"Rev": "1aaf839fb07e099361e445273993ccd9adc21b07"
 		},
 		{
+			"ImportPath": "github.com/docker/docker/dockerversion",
+			"Comment": "v1.4.1-108-g364720b",
+			"Rev": "364720b5e7e725cdc466171de873eefdb8609a33"
+		},
+		{
 			"ImportPath": "github.com/docker/docker/pkg/archive",
 			"Comment": "v1.4.1-656-g2115131",
 			"Rev": "211513156dc1ace48e630b4bf4ea0fcfdc8d9abf"
@@ -406,6 +411,11 @@
 			"ImportPath": "github.com/docker/docker/pkg/fileutils",
 			"Comment": "v1.4.1-656-g2115131",
 			"Rev": "211513156dc1ace48e630b4bf4ea0fcfdc8d9abf"
+		},
+		{
+			"ImportPath": "github.com/docker/docker/pkg/httputils",
+			"Comment": "v1.4.1-108-g364720b",
+			"Rev": "364720b5e7e725cdc466171de873eefdb8609a33"
 		},
 		{
 			"ImportPath": "github.com/docker/docker/pkg/ioutils",
@@ -428,9 +438,29 @@
 			"Rev": "211513156dc1ace48e630b4bf4ea0fcfdc8d9abf"
 		},
 		{
+			"ImportPath": "github.com/docker/docker/pkg/tarsum",
+			"Comment": "v1.4.1-108-g364720b",
+			"Rev": "364720b5e7e725cdc466171de873eefdb8609a33"
+		},
+		{
+			"ImportPath": "github.com/docker/docker/pkg/term",
+			"Comment": "v1.4.1-108-g364720b",
+			"Rev": "364720b5e7e725cdc466171de873eefdb8609a33"
+		},
+		{
+			"ImportPath": "github.com/docker/docker/pkg/timeutils",
+			"Comment": "v1.4.1-108-g364720b",
+			"Rev": "364720b5e7e725cdc466171de873eefdb8609a33"
+		},
+		{
 			"ImportPath": "github.com/docker/docker/pkg/units",
 			"Comment": "v1.4.1-656-g2115131",
 			"Rev": "211513156dc1ace48e630b4bf4ea0fcfdc8d9abf"
+		},
+		{
+			"ImportPath": "github.com/docker/docker/utils",
+			"Comment": "v1.4.1-108-g364720b",
+			"Rev": "364720b5e7e725cdc466171de873eefdb8609a33"
 		},
 		{
 			"ImportPath": "github.com/docker/docker/vendor/src/code.google.com/p/go/src/pkg/archive/tar",
@@ -482,6 +512,10 @@
 			"Rev": "a8662172a384296ff59d28f837e151643c662985"
 		},
 		{
+			"ImportPath": "github.com/gorilla/mux",
+			"Rev": "9b36453141c35697401168b07f2c09fcff7721ce"
+		},
+		{
 			"ImportPath": "github.com/gorilla/securecookie",
 			"Rev": "1b0c7f6e9ab3d7f500fd7d50c7ad835ff428139b"
 		},
@@ -507,6 +541,10 @@
 		{
 			"ImportPath": "github.com/pkg/profile",
 			"Rev": "c795610ec6e479e5795f7852db65ea15073674a6"
+		},
+		{
+			"ImportPath": "github.com/smarterclayton/go-dockerregistryclient",
+			"Rev": "3b6185cb3ac3811057e317dcff91f36eef17b8b0"
 		},
 		{
 			"ImportPath": "github.com/spf13/cobra",
