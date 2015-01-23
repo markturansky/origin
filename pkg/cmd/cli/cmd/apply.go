@@ -38,12 +38,19 @@ Examples:
 			schema, err := f.Validator(cmd)
 			checkErr(err)
 			mapper, typer := f.Object(cmd)
-			_, namespace, _, data := kubecmd.ResourceFromFile(cmd, filename, typer, mapper, schema)
+			clientConfig, err := f.ClientConfig(cmd)
+			checkErr(err)
+			cmdApiVersion := clientConfig.Version
+
+			_, namespace, _, data := kubecmd.ResourceFromFile(filename, typer, mapper, schema, cmdApiVersion)
 
 			if len(namespace) == 0 {
 				namespace = getOriginNamespace(cmd)
 			} else {
-				err := kubecmd.CompareNamespaceFromFile(cmd, namespace)
+				cmdNamespace, err := f.DefaultNamespace(cmd)
+				checkErr(err)
+
+				err = kubecmd.CompareNamespace(cmdNamespace, namespace)
 				checkErr(err)
 			}
 
