@@ -142,7 +142,7 @@ func NewCommandStartServer(name string) *cobra.Command {
 	flag.Var(&cfg.NodeList, "nodes", "The hostnames of each node. This currently must be specified up front. Comma delimited list")
 	flag.Var(&cfg.CORSAllowedOrigins, "cors-allowed-origins", "List of allowed origins for CORS, comma separated.  An allowed origin can be a regular expression to support subdomain matching.  CORS is enabled for localhost, 127.0.0.1, and the asset server by default.")
 	flag.BoolVar(&cfg.RequireAuthentication, "require-authentication", false, "Require authentication token for API access.")
-	flag.StringVar(&cfg.MasterServiceNamespace, "master_service_namespace", "The namespace from which the kubernetes master services should be injected into pods")
+	flag.StringVar(&cfg.MasterServiceNamespace, "master_service_namespace", kapi.NamespaceDefault, "The namespace from which the kubernetes master services should be injected into pods")
 
 	cfg.Docker.InstallFlags(flag)
 
