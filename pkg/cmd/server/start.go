@@ -89,6 +89,8 @@ type config struct {
 
 	CORSAllowedOrigins    flagtypes.StringList
 	RequireAuthentication bool
+
+	MasterServiceNamespace string
 }
 
 // NewCommandStartServer provides a CLI handler for 'start' command
@@ -108,8 +110,9 @@ func NewCommandStartServer(name string) *cobra.Command {
 		KubernetesAddr: flagtypes.Addr{DefaultScheme: "https", DefaultPort: 8443}.Default(),
 		PortalNet:      flagtypes.DefaultIPNet("172.30.17.0/24"),
 
-		Hostname: hostname,
-		NodeList: flagtypes.StringList{"127.0.0.1"},
+		Hostname:               hostname,
+		NodeList:               flagtypes.StringList{"127.0.0.1"},
+		MasterServiceNamespace: kapi.NamespaceDefault,
 	}
 
 	cmd := &cobra.Command{
@@ -139,6 +142,7 @@ func NewCommandStartServer(name string) *cobra.Command {
 	flag.Var(&cfg.NodeList, "nodes", "The hostnames of each node. This currently must be specified up front. Comma delimited list")
 	flag.Var(&cfg.CORSAllowedOrigins, "cors-allowed-origins", "List of allowed origins for CORS, comma separated.  An allowed origin can be a regular expression to support subdomain matching.  CORS is enabled for localhost, 127.0.0.1, and the asset server by default.")
 	flag.BoolVar(&cfg.RequireAuthentication, "require-authentication", false, "Require authentication token for API access.")
+	flag.StringVar(&cfg.MasterServiceNamespace, "master_service_namespace", "The namespace from which the kubernetes master services should be injected into pods")
 
 	cfg.Docker.InstallFlags(flag)
 
@@ -380,7 +384,8 @@ func start(cfg *config, args []string) error {
 
 			NetworkContainerImage: env("KUBERNETES_NETWORK_CONTAINER_IMAGE", kubelet.NetworkContainerImage),
 
-			EtcdClient: etcdClient,
+			EtcdClient:             etcdClient,
+			MasterServiceNamespace: cfg.MasterServiceNamespace,
 		}
 
 		nodeConfig.EnsureVolumeDir()
