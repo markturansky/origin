@@ -50,6 +50,9 @@ type NodeConfig struct {
 	EtcdClient *etcd.Client
 	// A client to connect to Docker
 	DockerClient *docker.Client
+
+	// The namespace from which the kubernetes master services should be injected into pods
+	MasterServiceNamespace string
 }
 
 // EnsureDocker attempts to connect to the Docker daemon defined by the helper,
@@ -103,7 +106,10 @@ func (c *NodeConfig) RunKubelet() {
 		5,
 		cfg.IsSourceSeen,
 		"",
-		net.IP(util.IP{}))
+		net.IP(util.IP{}),
+		c.MasterServiceNamespace,
+		// volume plugins
+		nil)
 	if err != nil {
 		glog.Fatalf("Couldn't run kubelet: %s", err)
 	}
