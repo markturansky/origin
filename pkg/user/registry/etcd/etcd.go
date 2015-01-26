@@ -10,6 +10,7 @@ import (
 
 	"github.com/openshift/origin/pkg/user"
 	"github.com/openshift/origin/pkg/user/api"
+	"github.com/GoogleCloudPlatform/kubernetes/pkg/types"
 )
 
 // Etcd implements UserIdentityMapping backed by etcd.
@@ -56,14 +57,14 @@ func (r *Etcd) CreateOrUpdateUserIdentityMapping(mapping *api.UserIdentityMappin
 		// did not previously exist
 		if existing.Identity.Name == "" {
 			uid := uuid.New()
-			existing.User.UID = uid
+			existing.User.UID = types.UID(uid)
 			existing.User.Name = name
 			if err := r.initializer.InitializeUser(&mapping.Identity, &existing.User); err != nil {
 				return in, err
 			}
 
 			// set these again to prevent bad initialization from messing up data
-			existing.User.UID = uid
+			existing.User.UID = types.UID(uid)
 			existing.User.Name = name
 			existing.Identity = mapping.Identity
 
