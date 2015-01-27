@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	kapi "github.com/GoogleCloudPlatform/kubernetes/pkg/api"
+	kapi_v1beta1 "github.com/GoogleCloudPlatform/kubernetes/pkg/api/v1beta1"
 	"github.com/GoogleCloudPlatform/kubernetes/pkg/api/errors"
 	klatest "github.com/GoogleCloudPlatform/kubernetes/pkg/api/latest"
 	"github.com/GoogleCloudPlatform/kubernetes/pkg/apiserver"
@@ -233,6 +234,9 @@ func NewTestImageOpenShift(t *testing.T) *testImageOpenshift {
 		APIPrefix:          "/api/v1beta1",
 	})
 
+	if &kmaster != nil {
+	}
+
 	interfaces, _ := latest.InterfacesFor(latest.Version)
 
 	imageEtcd := imageetcd.New(etcdHelper, imageetcd.DefaultRegistryFunc(func() (string, bool) { return openshift.dockerServer.URL, true }))
@@ -245,10 +249,10 @@ func NewTestImageOpenShift(t *testing.T) *testImageOpenshift {
 	}
 
 	handlerContainer := master.NewHandlerContainer(osMux)
-	apiserver.NewAPIGroupVersion(kmaster.API_v1beta1()).InstallREST(handlerContainer, "/api", "v1beta1")
+	apiserver.NewAPIGroupVersion(storage, kapi_v1beta1.Codec, "/api/v1beta1", klatest.SelfLinker, admit.NewAlwaysAdmit()).InstallREST(handlerContainer, osMux, "/api", "v1beta1")
 
 	osPrefix := "/osapi/v1beta1"
-	apiserver.NewAPIGroupVersion(storage, latest.Codec, osPrefix, interfaces.MetadataAccessor, admit.NewAlwaysAdmit()).InstallREST(handlerContainer, "/osapi", "v1beta1")
+	apiserver.NewAPIGroupVersion(storage, latest.Codec, osPrefix, interfaces.MetadataAccessor, admit.NewAlwaysAdmit()).InstallREST(handlerContainer, osMux, "/osapi", "v1beta1")
 
 	return openshift
 }

@@ -10,6 +10,7 @@ import (
 	"github.com/golang/glog"
 
 	kapi "github.com/GoogleCloudPlatform/kubernetes/pkg/api"
+	kapi_v1beta1 "github.com/GoogleCloudPlatform/kubernetes/pkg/api/v1beta1"
 	klatest "github.com/GoogleCloudPlatform/kubernetes/pkg/api/latest"
 	"github.com/GoogleCloudPlatform/kubernetes/pkg/apiserver"
 	"github.com/GoogleCloudPlatform/kubernetes/pkg/client"
@@ -324,6 +325,7 @@ func NewTestOpenshift(t *testing.T) *testOpenshift {
 	etcdHelper, _ := master.NewEtcdHelper(etcdClient, klatest.Version)
 
 	osMux := http.NewServeMux()
+	muxHelper := &apiserver.MuxHelper{ osMux, []string{}}
 	openshift.Server = httptest.NewServer(osMux)
 
 	kubeClient := client.NewOrDie(&client.Config{Host: openshift.Server.URL, Version: klatest.Version})
@@ -345,6 +347,9 @@ func NewTestOpenshift(t *testing.T) *testOpenshift {
 		APIPrefix:          "/api/v1beta1",
 		AdmissionControl:   admit.NewAlwaysAdmit(),
 	})
+
+	if &kmaster != nil {
+	}
 
 	interfaces, _ := latest.InterfacesFor(latest.Version)
 
@@ -373,10 +378,10 @@ func NewTestOpenshift(t *testing.T) *testOpenshift {
 	}
 
 	handlerContainer := master.NewHandlerContainer(osMux)
-	apiserver.NewAPIGroupVersion(kmaster.API_v1beta1()).InstallREST(handlerContainer, "/api", "v1beta1")
+	apiserver.NewAPIGroupVersion(storage, kapi_v1beta1.Codec, "/api/v1beta1", klatest.SelfLinker, admit.NewAlwaysAdmit()).InstallREST(handlerContainer, muxHelper, "/api", "v1beta1")
 
 	osPrefix := "/osapi/v1beta1"
-	apiserver.NewAPIGroupVersion(storage, v1beta1.Codec, osPrefix, interfaces.MetadataAccessor, admit.NewAlwaysAdmit()).InstallREST(handlerContainer, "/osapi", "v1beta1")
+	apiserver.NewAPIGroupVersion(storage, v1beta1.Codec, osPrefix, interfaces.MetadataAccessor, admit.NewAlwaysAdmit()).InstallREST(handlerContainer, muxHelper, "/osapi", "v1beta1")
 
 	dccFactory := deploycontrollerfactory.DeploymentConfigControllerFactory{
 		Client:     osClient,
