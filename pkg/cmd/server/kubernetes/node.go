@@ -14,6 +14,7 @@ import (
 	"github.com/GoogleCloudPlatform/kubernetes/pkg/util"
 	"github.com/GoogleCloudPlatform/kubernetes/pkg/util/exec"
 	"github.com/GoogleCloudPlatform/kubernetes/pkg/util/iptables"
+
 	"github.com/coreos/go-etcd/etcd"
 	"github.com/fsouza/go-dockerclient"
 	"github.com/golang/glog"
@@ -21,6 +22,7 @@ import (
 
 	dockerutil "github.com/openshift/origin/pkg/cmd/util/docker"
 
+	"github.com/openshift/origin/pkg/kubelet/app"
 	"github.com/openshift/origin/pkg/service"
 )
 
@@ -108,8 +110,7 @@ func (c *NodeConfig) RunKubelet() {
 		"",
 		net.IP(util.IP{}),
 		c.MasterServiceNamespace,
-		// volume plugins
-		nil)
+		app.ProbeVolumePlugins())
 	if err != nil {
 		glog.Fatalf("Couldn't run kubelet: %s", err)
 	}
