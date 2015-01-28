@@ -103,7 +103,7 @@ func (r *REST) New() runtime.Object {
 }
 
 func (*REST) NewList() runtime.Object {
-	return nil
+	return &api.BuildLog{}
 }
 
 func (r *REST) List(ctx kapi.Context, selector, fields labels.Selector) (runtime.Object, error) {
