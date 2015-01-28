@@ -3,9 +3,6 @@ package cmd
 import (
 	"os"
 
-	kapi "github.com/GoogleCloudPlatform/kubernetes/pkg/api"
-	"github.com/GoogleCloudPlatform/kubernetes/pkg/kubectl"
-	kubecmd "github.com/GoogleCloudPlatform/kubernetes/pkg/kubectl/cmd"
 	"github.com/golang/glog"
 	"github.com/spf13/cobra"
 )
