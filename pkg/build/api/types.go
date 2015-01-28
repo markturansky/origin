@@ -329,3 +329,9 @@ type GitInfo struct {
 	GitBuildSource    `json:",inline"`
 	GitSourceRevision `json:",inline"`
 }
+
+// Placeholder for registering endpoints
+type BuildLog struct {
+	kapi.TypeMeta `json:",inline"`
+	kapi.ListMeta `json:"metadata,omitempty"`
+}

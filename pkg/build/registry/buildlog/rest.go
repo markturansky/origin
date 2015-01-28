@@ -99,11 +99,11 @@ func (r *REST) Get(ctx kapi.Context, id string) (runtime.Object, error) {
 }
 
 func (r *REST) New() runtime.Object {
-	return nil
+	return &api.BuildLog{}
 }
 
 func (*REST) NewList() runtime.Object {
-	return nil
+	return &api.BuildLog{}
 }
 
 func (r *REST) List(ctx kapi.Context, selector, fields labels.Selector) (runtime.Object, error) {
