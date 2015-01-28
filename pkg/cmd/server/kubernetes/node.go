@@ -119,7 +119,7 @@ func (c *NodeConfig) RunKubelet() {
 	// this parameter must be true, otherwise buildLogs won't work
 	enableDebuggingHandlers := true
 	go util.Forever(func() {
-		glog.Infof("Started Kubelet for node %s, server at %s:%d", c.NodeHost, c.BindHost, NodePort)
+		glog.Infof("Started Kubelet for node %s, server at %s:%d, ServiceNS %v", c.NodeHost, c.BindHost, NodePort, c.MasterServiceNamespace)
 		kubelet.ListenAndServeKubeletServer(k, net.ParseIP(c.BindHost), uint(NodePort), enableDebuggingHandlers)
 	}, 0)
 
