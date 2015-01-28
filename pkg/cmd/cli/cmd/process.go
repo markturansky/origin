@@ -43,7 +43,8 @@ Examples:
 
 			mappings, namespace, _, data := kubecmd.ResourceFromFile(filename, typer, mapper, schema, cmdApiVersion)
 			if len(namespace) == 0 {
-				namespace = getOriginNamespace(cmd)
+				namespace,err = f.DefaultNamespace(cmd)
+				checkErr(err)
 			} else {
 				cmdNamespace, err := f.DefaultNamespace(cmd)
 				checkErr(err)

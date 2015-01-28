@@ -21,20 +21,3 @@ func checkErr(err error) {
 		glog.FatalDepth(1, err)
 	}
 }
-
-func getOriginNamespace(cmd *cobra.Command) string {
-	result := kapi.NamespaceDefault
-	if ns := kubecmd.GetFlagString(cmd, "namespace"); len(ns) > 0 {
-		result = ns
-		glog.V(2).Infof("Using namespace from -ns flag")
-	} else {
-		nsPath := kubecmd.GetFlagString(cmd, "ns-path")
-		nsInfo, err := kubectl.LoadNamespaceInfo(nsPath)
-		if err != nil {
-			glog.Fatalf("Error loading current namespace: %v", err)
-		}
-		result = nsInfo.Namespace
-	}
-	glog.V(2).Infof("Using namespace %s", result)
-	return result
-}
