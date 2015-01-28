@@ -35,7 +35,7 @@ func (r RealPodControl) getPod(namespace, name string) (*kapi.Pod, error) {
 }
 
 // NewREST creates a new REST for BuildLog
-// Takes build registry and pod client to get neccessary attibutes to assamble
+// Takes build registry and pod client to get necessary attributes to assemble
 // URL to which the request shall be redirected in order to get build logs.
 func NewREST(b build.Registry, pn kclient.PodsNamespacer) apiserver.RESTStorage {
 	return &REST{
@@ -103,7 +103,7 @@ func (r *REST) New() runtime.Object {
 }
 
 func (*REST) NewList() runtime.Object {
-	return &api.BuildLog{}
+	return nil
 }
 
 func (r *REST) List(ctx kapi.Context, selector, fields labels.Selector) (runtime.Object, error) {
