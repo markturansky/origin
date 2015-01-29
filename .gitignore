@@ -8,3 +8,5 @@
 .vimrc
 .vagrant-openshift.json
 .DS_Store
+.idea
+origin.iml
