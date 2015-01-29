@@ -35,11 +35,12 @@ import (
 	"github.com/GoogleCloudPlatform/kubernetes/pkg/util"
 	"github.com/GoogleCloudPlatform/kubernetes/pkg/watch"
 	watchjson "github.com/GoogleCloudPlatform/kubernetes/pkg/watch/json"
+	"github.com/golang/glog"
 )
 
 // specialParams lists parameters that are handled specially and which users of Request
 // are therefore not allowed to set manually.
-var specialParams = util.NewStringSet("sync", "timeout")
+var specialParams = util.NewStringSet("timeout")
 
 // PollFunc is called when a server operation returns 202 accepted. The name of the
 // operation is extracted from the response and passed to this function. Return a
@@ -107,7 +108,6 @@ type Request struct {
 	resource     string
 	resourceName string
 	selector     labels.Selector
-	sync         bool
 	timeout      time.Duration
 
 	// output
@@ -174,15 +174,6 @@ func (r *Request) Name(resourceName string) *Request {
 		return r
 	}
 	r.resourceName = resourceName
-	return r
-}
-
-// Sync sets sync/async call status by setting the "sync" parameter to "true"/"false".
-func (r *Request) Sync(sync bool) *Request {
-	if r.err != nil {
-		return r
-	}
-	r.sync = sync
 	return r
 }
 
@@ -270,7 +261,7 @@ func (r *Request) setParam(paramName, value string) *Request {
 }
 
 // Timeout makes the request use the given duration as a timeout. Sets the "timeout"
-// parameter. Ignored if sync=false.
+// parameter.
 func (r *Request) Timeout(d time.Duration) *Request {
 	if r.err != nil {
 		return r
@@ -359,13 +350,9 @@ func (r *Request) finalURL() string {
 		query.Add("namespace", r.namespace)
 	}
 
-	// sync and timeout are handled specially here, to allow setting them
-	// in any order.
-	if r.sync {
-		query.Add("sync", "true")
-		if r.timeout != 0 {
-			query.Add("timeout", r.timeout.String())
-		}
+	// timeout is handled specially here.
+	if r.timeout != 0 {
+		query.Add("timeout", r.timeout.String())
 	}
 	finalURL.RawQuery = query.Encode()
 	return finalURL.String()
@@ -457,6 +444,10 @@ func (r *Request) Do() Result {
 		client = http.DefaultClient
 	}
 
+	// Right now we make about ten retry attempts if we get a Retry-After response.
+	// TODO: Change to a timeout based approach.
+	retries := 0
+
 	for {
 		if r.err != nil {
 			return Result{err: &RequestConstructionError{r.err}}
@@ -478,6 +469,20 @@ func (r *Request) Do() Result {
 			continue
 		}
 
+		// Check to see if we got a 429 Too Many Requests response code.
+		if resp.StatusCode == errors.StatusTooManyRequests {
+			if retries < 10 {
+				retries++
+				if waitFor := resp.Header.Get("Retry-After"); waitFor != "" {
+					delay, err := strconv.Atoi(waitFor)
+					if err == nil {
+						glog.V(4).Infof("Got a Retry-After %s response for attempt %d to %v", waitFor, retries, r.finalURL())
+						time.Sleep(time.Duration(delay) * time.Second)
+						continue
+					}
+				}
+			}
+		}
 		return Result{respBody, created, err, r.codec}
 	}
 }
