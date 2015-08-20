@@ -28,6 +28,8 @@ import (
 	schedulerapi "k8s.io/kubernetes/plugin/pkg/scheduler/api"
 	latestschedulerapi "k8s.io/kubernetes/plugin/pkg/scheduler/api/latest"
 	"k8s.io/kubernetes/plugin/pkg/scheduler/factory"
+
+	"github.com/openshift/origin/pkg/cmd/server/origin"
 )
 
 const (
@@ -69,25 +71,24 @@ func (c *MasterConfig) RunPersistentVolumeClaimBinder() {
 	glog.Infof("Started Kubernetes Persistent Volume Claim Binder")
 }
 
-func (c *MasterConfig) RunPersistentVolumeClaimRecycler(recyclerImageName string) {
+func (c *MasterConfig) RunPersistentVolumeClaimRecycler(oc *origin.MasterConfig) {
+	// VolumeConfig contains defaults that can be overridden
+	volumeConfig := volume.NewVolumeConfig()
 
-	hostPathRecycler := &volume.RecyclableVolumeConfig{
-		ImageName: recyclerImageName,
-		Command:   []string{"/usr/share/openshift/scripts/volumes/recycler.sh"},
-		Args:      []string{"/scrub"},
-		Timeout:   int64(60),
-	}
+	defaultScrubPod := volumeConfig.PersistentVolumeRecyclerDefaultScrubPod
+	defaultScrubPod.Spec.Containers[0].Image = oc.ImageFor("deployer")
+	defaultScrubPod.Spec.Containers[0].Command = []string{"/usr/share/openshift/scripts/volumes/recycler.sh"}
+	defaultScrubPod.Spec.Containers[0].Args = []string{"/scrub"}
 
-	nfsRecycler := &volume.RecyclableVolumeConfig{
-		ImageName: recyclerImageName,
-		Command:   []string{"/usr/share/openshift/scripts/volumes/recycler.sh"},
-		Args:      []string{"/scrub"},
-		Timeout:   int64(300),
-	}
+	volumeConfig.PersistentVolumeRecyclerDefaultScrubPod = defaultScrubPod
+	volumeConfig.PersistentVolumeRecyclerMinTimeoutNfs = 300
+	volumeConfig.PersistentVolumeRecyclerTimeoutIncrementNfs = 30
+	volumeConfig.PersistentVolumeRecyclerMinTimeoutHostPath = 120
+	volumeConfig.PersistentVolumeRecyclerTimeoutIncrementHostPath = 30
 
 	allPlugins := []volume.VolumePlugin{}
-	allPlugins = append(allPlugins, host_path.ProbeVolumePlugins(hostPathRecycler)...)
-	allPlugins = append(allPlugins, nfs.ProbeVolumePlugins(nfsRecycler)...)
+	allPlugins = append(allPlugins, host_path.ProbeVolumePlugins(volumeConfig)...)
+	allPlugins = append(allPlugins, nfs.ProbeVolumePlugins(volumeConfig)...)
 
 	recycler, err := volumeclaimbinder.NewPersistentVolumeRecycler(c.KubeClient, c.ControllerManager.PVClaimBinderSyncPeriod, allPlugins)
 	if err != nil {

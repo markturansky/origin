@@ -258,7 +258,7 @@ func newRecycler(spec *volume.Spec, host volume.VolumeHost, volumeConfig *volume
 		path:         spec.PersistentVolume.Spec.NFS.Path,
 		host:         host,
 		volumeConfig: volumeConfig,
-		timeout:      volume.CalculateTimeoutForVolume(volumeConfig.NFSScrubPodMinimumTimeout, volumeConfig.NFSScrubPodTimeoutIncrement, spec.PersistentVolume),
+		timeout:      volume.CalculateTimeoutForVolume(volumeConfig.PersistentVolumeRecyclerMinTimeoutNfs, volumeConfig.PersistentVolumeRecyclerTimeoutIncrementNfs, spec.PersistentVolume),
 	}, nil
 }
 
@@ -281,7 +281,7 @@ func (r *nfsRecycler) GetPath() string {
 // Recycle blocks until the pod has completed or any error occurs.
 // The scrubber pod's is expected to succeed within 5 minutes else an error will be returned.
 func (r *nfsRecycler) Recycle() error {
-	pod := r.volumeConfig.DefaultScrubberPodTemplate
+	pod := r.volumeConfig.PersistentVolumeRecyclerDefaultScrubPod
 
 	// overrides
 	pod.Spec.ActiveDeadlineSeconds = &r.timeout

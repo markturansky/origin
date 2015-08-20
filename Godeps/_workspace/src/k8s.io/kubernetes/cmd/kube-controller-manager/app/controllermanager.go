@@ -79,11 +79,11 @@ type CMServer struct {
 	RootCAFile              string
 
 	// volumeConfig
-	PVDefaultScrubPodPath            string
-	NFSScrubPodMinimumTimeout        int
-	NFSScrubPodTimeoutIncrement      int
-	HostPathScrubPodMinimumTimeout   int
-	HostPathScrubPodTimeoutIncrement int
+	PersistentVolumeRecyclerDefaultScrubPod          string
+	PersistentVolumeRecyclerMinTimeoutNfs            int
+	PersistentVolumeRecyclerTimeoutIncrementNfs      int
+	PersistentVolumeRecyclerMinTimeoutHostPath       int
+	PersistentVolumeRecyclerTimeoutIncrementHostPath int
 
 	ClusterName       string
 	ClusterCIDR       net.IPNet
@@ -106,10 +106,10 @@ func NewCMServer() *CMServer {
 		ResourceQuotaSyncPeriod:          10 * time.Second,
 		NamespaceSyncPeriod:              5 * time.Minute,
 		PVClaimBinderSyncPeriod:          10 * time.Second,
-		NFSScrubPodMinimumTimeout:        300,
-		NFSScrubPodTimeoutIncrement:      30,
-		HostPathScrubPodMinimumTimeout:   60,
-		HostPathScrubPodTimeoutIncrement: 30,
+		PersistentVolumeRecyclerMinTimeoutNfs:            300,
+		PersistentVolumeRecyclerTimeoutIncrementNfs:      30,
+		PersistentVolumeRecyclerMinTimeoutHostPath:       60,
+		PersistentVolumeRecyclerTimeoutIncrementHostPath: 30,
 		RegisterRetryCount:               10,
 		PodEvictionTimeout:               5 * time.Minute,
 		ClusterName:                      "kubernetes",
@@ -132,11 +132,11 @@ func (s *CMServer) AddFlags(fs *pflag.FlagSet) {
 	fs.DurationVar(&s.ResourceQuotaSyncPeriod, "resource-quota-sync-period", s.ResourceQuotaSyncPeriod, "The period for syncing quota usage status in the system")
 	fs.DurationVar(&s.NamespaceSyncPeriod, "namespace-sync-period", s.NamespaceSyncPeriod, "The period for syncing namespace life-cycle updates")
 	fs.DurationVar(&s.PVClaimBinderSyncPeriod, "pvclaimbinder-sync-period", s.PVClaimBinderSyncPeriod, "The period for syncing persistent volumes and persistent volume claims")
-	fs.StringVar(&s.PVDefaultScrubPodPath, "pv-recycler-default-scrub-pod", s.PVDefaultScrubPodPath, "The file path to a pod definition used as a template for persistent volume recycling")
-	fs.IntVar(&s.NFSScrubPodMinimumTimeout, "pv-recycler-min-timeout-nfs", s.NFSScrubPodMinimumTimeout, "The minimum ActiveDeadlineSeconds to use for an NFS Recycler pod")
-	fs.IntVar(&s.NFSScrubPodTimeoutIncrement, "pv-recycler-timeout-increment-nfs", s.NFSScrubPodTimeoutIncrement, "the increment of time added per Gi to ActiveDeadlineSeconds for an NFS scrubber pod")
-	fs.IntVar(&s.HostPathScrubPodMinimumTimeout, "pv-recycler-min-timeout-hostpath", s.HostPathScrubPodMinimumTimeout, "The minimum ActiveDeadlineSeconds to use for a HostPath Recycler pod")
-	fs.IntVar(&s.HostPathScrubPodTimeoutIncrement, "pv-recycler-timeout-increment-hostpath", s.HostPathScrubPodTimeoutIncrement, "the increment of time added per Gi to ActiveDeadlineSeconds for a HostPath scrubber pod")
+	fs.StringVar(&s.PersistentVolumeRecyclerDefaultScrubPod, "pv-recycler-default-scrub-pod", s.PersistentVolumeRecyclerDefaultScrubPod, "The file path to a pod definition used as a template for persistent volume recycling")
+	fs.IntVar(&s.PersistentVolumeRecyclerMinTimeoutNfs, "pv-recycler-min-timeout-nfs", s.PersistentVolumeRecyclerMinTimeoutNfs, "The minimum ActiveDeadlineSeconds to use for an NFS Recycler pod")
+	fs.IntVar(&s.PersistentVolumeRecyclerTimeoutIncrementNfs, "pv-recycler-timeout-increment-nfs", s.PersistentVolumeRecyclerTimeoutIncrementNfs, "the increment of time added per Gi to ActiveDeadlineSeconds for an NFS scrubber pod")
+	fs.IntVar(&s.PersistentVolumeRecyclerMinTimeoutHostPath, "pv-recycler-min-timeout-hostpath", s.PersistentVolumeRecyclerMinTimeoutHostPath, "The minimum ActiveDeadlineSeconds to use for a HostPath Recycler pod")
+	fs.IntVar(&s.PersistentVolumeRecyclerTimeoutIncrementHostPath, "pv-recycler-timeout-increment-hostpath", s.PersistentVolumeRecyclerTimeoutIncrementHostPath, "the increment of time added per Gi to ActiveDeadlineSeconds for a HostPath scrubber pod")
 	fs.DurationVar(&s.PodEvictionTimeout, "pod-eviction-timeout", s.PodEvictionTimeout, "The grace period for deleting pods on failed nodes.")
 	fs.Float32Var(&s.DeletingPodsQps, "deleting-pods-qps", 0.1, "Number of nodes per second on which pods are deleted in case of node failure.")
 	fs.IntVar(&s.DeletingPodsBurst, "deleting-pods-burst", 10, "Number of nodes on which pods are bursty deleted in case of node failure. For more details look into RateLimiter.")
@@ -243,16 +243,16 @@ func (s *CMServer) Run(_ []string) error {
 	pvclaimBinder.Run()
 
 	volumeConfig := volume.NewVolumeConfig()
-	volumeConfig.HostPathScrubPodMinimumTimeout = int64(s.HostPathScrubPodMinimumTimeout)
-	volumeConfig.HostPathScrubPodTimeoutIncrement = int64(s.HostPathScrubPodTimeoutIncrement)
-	volumeConfig.NFSScrubPodMinimumTimeout = int64(s.NFSScrubPodMinimumTimeout)
-	volumeConfig.NFSScrubPodTimeoutIncrement = int64(s.NFSScrubPodTimeoutIncrement)
-	if s.PVDefaultScrubPodPath != "" {
-		scrubPod, err := volume.InitScrubPod(s.PVDefaultScrubPodPath)
+	volumeConfig.PersistentVolumeRecyclerMinTimeoutHostPath = int64(s.PersistentVolumeRecyclerMinTimeoutHostPath)
+	volumeConfig.PersistentVolumeRecyclerTimeoutIncrementHostPath = int64(s.PersistentVolumeRecyclerTimeoutIncrementHostPath)
+	volumeConfig.PersistentVolumeRecyclerMinTimeoutNfs = int64(s.PersistentVolumeRecyclerMinTimeoutNfs)
+	volumeConfig.PersistentVolumeRecyclerTimeoutIncrementNfs = int64(s.PersistentVolumeRecyclerTimeoutIncrementNfs)
+	if s.PersistentVolumeRecyclerDefaultScrubPod != "" {
+		scrubPod, err := volume.InitScrubPod(s.PersistentVolumeRecyclerDefaultScrubPod)
 		if err != nil {
 			glog.Fatalf("Override of default PersistentVolume scrub pod failed: %+v", err)
 		}
-		volumeConfig.DefaultScrubberPodTemplate = scrubPod
+		volumeConfig.PersistentVolumeRecyclerDefaultScrubPod = scrubPod
 	}
 
 	pvRecycler, err := volumeclaimbinder.NewPersistentVolumeRecycler(kubeClient, s.PVClaimBinderSyncPeriod, ProbeRecyclableVolumePlugins(volumeConfig))

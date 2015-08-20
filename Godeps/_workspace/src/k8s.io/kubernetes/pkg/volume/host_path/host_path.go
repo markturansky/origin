@@ -117,7 +117,7 @@ func newRecycler(spec *volume.Spec, host volume.VolumeHost, volumeConfig *volume
 		path:         spec.PersistentVolume.Spec.HostPath.Path,
 		host:         host,
 		volumeConfig: *volumeConfig,
-		timeout:      volume.CalculateTimeoutForVolume(volumeConfig.HostPathScrubPodMinimumTimeout, volumeConfig.HostPathScrubPodTimeoutIncrement, spec.PersistentVolume),
+		timeout:      volume.CalculateTimeoutForVolume(volumeConfig.PersistentVolumeRecyclerMinTimeoutHostPath, volumeConfig.PersistentVolumeRecyclerTimeoutIncrementHostPath, spec.PersistentVolume),
 	}, nil
 }
 
@@ -191,7 +191,7 @@ func (r *hostPathRecycler) GetPath() string {
 // development and testing in a single node cluster only.
 // Recycle blocks until the pod has completed or any error occurs.
 func (r *hostPathRecycler) Recycle() error {
-	pod := r.volumeConfig.DefaultScrubberPodTemplate
+	pod := r.volumeConfig.PersistentVolumeRecyclerDefaultScrubPod
 
 	// overrides
 	pod.Spec.ActiveDeadlineSeconds = &r.timeout

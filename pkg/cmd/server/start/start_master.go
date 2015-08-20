@@ -528,7 +528,7 @@ func startControllers(oc *origin.MasterConfig, kc *kubernetes.MasterConfig) erro
 		kc.RunEndpointController()
 		kc.RunNamespaceController()
 		kc.RunPersistentVolumeClaimBinder()
-		kc.RunPersistentVolumeClaimRecycler(oc.ImageFor("deployer"))
+		kc.RunPersistentVolumeClaimRecycler(oc)
 	}
 
 	// no special order

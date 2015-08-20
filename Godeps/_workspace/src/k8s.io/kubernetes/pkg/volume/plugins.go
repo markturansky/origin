@@ -146,23 +146,21 @@ type VolumeConfig struct {
 	// the default scrub pod is a template pod used by plugins when creating new Recyclers.
 	// The plugin is required to change the pod's VolumeSource to match the volume of the plugin and set any
 	// necessary information on the scrubber, such as path, server, or timeout.
-	DefaultScrubberPodTemplate *api.Pod
-
+	PersistentVolumeRecyclerDefaultScrubPod *api.Pod
 	// the minimum ActiveDeadlineSeconds for an NFS scrubber pod
-	NFSScrubPodMinimumTimeout int64
+	PersistentVolumeRecyclerMinTimeoutNfs int64
 	// the increment of time added per Gi to ActiveDeadlineSeconds for an NFS scrubber pod
-	NFSScrubPodTimeoutIncrement int64
-
+	PersistentVolumeRecyclerTimeoutIncrementNfs int64
 	// the minimum ActiveDeadlineSeconds for an HostPath scrubber pod
-	HostPathScrubPodMinimumTimeout int64
+	PersistentVolumeRecyclerMinTimeoutHostPath int64
 	// the increment of time added per Gi to ActiveDeadlineSeconds for an HostPath scrubber pod
-	HostPathScrubPodTimeoutIncrement int64
+	PersistentVolumeRecyclerTimeoutIncrementHostPath int64
 }
 
 // NewVolumeConfig creates a VolumeConfig with default values.
 func NewVolumeConfig() *VolumeConfig {
 	return &VolumeConfig{
-		DefaultScrubberPodTemplate: createDefaultScrubberPodTemplate(),
+		PersistentVolumeRecyclerDefaultScrubPod: createDefaultScrubberPodTemplate(),
 	}
 }
 
