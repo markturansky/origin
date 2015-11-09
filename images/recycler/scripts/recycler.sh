@@ -21,20 +21,10 @@ if [[ ! -d ${dir} ]]; then
     exit 1
 fi
 
-# remount to nfsv3 so not restricted by nfs v4 acls, see nfs4_acl(5)
-tmp=${dir}
-mnt=`grep -w "${dir}" /proc/mounts |grep -w nfs4`
-exp=""
-[[ ! -z ${mnt} ]] &&  exp=`echo ${mnt}|awk '{print $1}'`
-[[ ! -z ${exp} ]] && tmp=`mktemp -d` && mount ${exp} ${tmp} -o vers=3,nolock
-# shred all files
-#find ${tmp} -type f -exec shred -fuvz {} \;
-# sudo to the file's uid/gid and delete it
-stat -c "%u %d %n" ${tmp} |xargs -n 3 bash -c 'sudo -u "#$1"  touch $3/start' argv0
-find ${tmp} -type f -exec stat -c "%u %g %n"  {} \; |xargs -n 3 bash -c 'sudo -u "#$1" shred  $3' argv0
+find ${dir} -type f -exec stat -c "%u %g %n"  {} \; |xargs -n 3 bash -c 'sudo -u "#$1" shred  $3' argv0
 
 #delete directories
-find ${tmp} -mindepth 1  -type d  -exec stat -c "%n %u %g"  {} \;|sort -k 1 -rg | xargs -n 3 bash -c 'sudo -u "#$2" rm -rf $1' argv0
+find ${dir} -mindepth 1  -type d  -exec stat -c "%n %u %g"  {} \;|sort -k 1 -rg | xargs -n 3 bash -c 'sudo -u "#$2" rm -rf $1' argv0
 
 # remove everything that was left, keeping the directory for re-use as a volume
 if rm -rfv ${dir}/*; then

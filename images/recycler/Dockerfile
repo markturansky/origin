@@ -15,4 +15,6 @@ RUN yum install -y nfs-utils sudo
 # To avoid error: sudo: sorry, you must have a tty to run sudo
 RUN sed -i -e "s/Defaults    requiretty.*/ #Defaults    requiretty/g" /etc/sudoers
 
+ADD scripts/recycler.sh /usr/share/openshift/scripts/volumes/recycler.sh
+
 ENTRYPOINT ["/usr/share/openshift/scripts/volumes/recycler.sh"]
