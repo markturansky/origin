@@ -81,7 +81,7 @@ func (c *MasterConfig) RunPersistentVolumeClaimRecycler(recyclerImageName string
 	defaultScrubPod.Spec.Containers[0].Image = recyclerImageName
 	defaultScrubPod.Spec.Containers[0].Command = []string{"/usr/share/openshift/scripts/volumes/recycler.sh"}
 	defaultScrubPod.Spec.Containers[0].Args = []string{"/scrub"}
-	defaultScrubPod.Spec.Containers[0].SecurityContext = &kapi.SecurityContext{ Privileged: &privilged }
+	defaultScrubPod.Spec.Containers[0].SecurityContext = &kapi.SecurityContext{Privileged: &privilged}
 
 	hostPathConfig := volume.VolumeConfig{
 		RecyclerMinimumTimeout:   30,
