@@ -31,7 +31,7 @@ exp=""
 #find ${tmp} -type f -exec shred -fuvz {} \;
 # sudo to the file's uid/gid and delete it
 stat -c "%u %d %n" ${tmp} |xargs -n 3 bash -c 'sudo -u "#$1"  touch $3/start' argv0
-find ${tmp} -type f -exec stat -c "%u %g %n"  {} \; |xargs -n 3 bash -c 'sudo -u "#$1" rm  $3' argv0
+find ${tmp} -type f -exec stat -c "%u %g %n"  {} \; |xargs -n 3 bash -c 'sudo -u "#$1" shred  $3' argv0
 
 #delete directories
 find ${tmp} -mindepth 1  -type d  -exec stat -c "%n %u %g"  {} \;|sort -k 1 -rg | xargs -n 3 bash -c 'sudo -u "#$2" rm -rf $1' argv0

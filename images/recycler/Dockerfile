@@ -9,4 +9,10 @@
 #
 FROM openshift/origin
 
-ENTRYPOINT ["/usr/bin/openshift-deploy"]
+RUN yum install -y nfs-utils sudo
+
+# Edit sudoers file
+# To avoid error: sudo: sorry, you must have a tty to run sudo
+RUN sed -i -e "s/Defaults    requiretty.*/ #Defaults    requiretty/g" /etc/sudoers
+
+ENTRYPOINT ["/usr/share/openshift/scripts/volumes/recycler.sh"]
