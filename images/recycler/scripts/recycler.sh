@@ -14,23 +14,35 @@ if [[ $# -ne 1 ]]; then
 fi
 
 # first and only arg is the directory to scrub
-dir=$1
+dir="${1}"
 
-if [[ ! -d ${dir} ]]; then
+if [[ ! -d "${dir}" ]]; then
     echo >&2 "Error: scrub directory '${dir}' does not exist"
     exit 1
 fi
 
-find ${dir} -type f -exec stat -c "%u %g %n"  {} \; |xargs -n 3 bash -c 'sudo -u "#$1" shred  $3' argv0
+# shred regular files
+function recycle_file() {
+    filename="${1}"
+    uid=$(stat -c "#%u" "${filename}")
+    sudo -u "${uid}" shred "${filename}"
+}
+export -f recycle_file
 
-#delete directories
-find ${dir} -mindepth 1  -type d  -exec stat -c "%n %u %g"  {} \;|sort -k 1 -rg | xargs -n 3 bash -c 'sudo -u "#$2" rm -rf $1' argv0
+find "${dir}" -type f -print0 | xargs -r -n 1 -0 bash -c 'recycle_file "$@"' {}
 
-# remove everything that was left, keeping the directory for re-use as a volume
-if rm -rfv ${dir}/*; then
-    echo 'Scrub OK'
-    exit 0
-fi
+# rm all
+function rm_all() {
+    filename="${1}"
+    uid=$(stat -c "#%u" "${filename}")
+    echo "rm_all '${filename}'"
+    sudo -u "${uid}" rm -rf "${filename}"
+}
+export -f rm_all
 
-echo 'Scrub failed'
-exit 1
+find "${dir}" ! -type d -print0 | xargs -r -n 1 -0 bash -c 'rm_all "$@"' {}
+
+find "${dir}" -mindepth 1 -type d -print0 | sort -z -k 1 -rg | xargs -r -n 1 -0 bash -c 'rm_all "$@"' {}
+
+echo "Scrub OK"
+exit 0
