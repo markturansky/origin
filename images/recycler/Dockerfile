@@ -5,7 +5,7 @@
 #   KUBERNETES_MASTER - the address of the OpenShift master
 #   KUBERNETES_DEPLOYMENT_ID - the deployment identifier that is running this build
 #
-# The standard name for this image is openshift/origin-deployer
+# The standard name for this image is openshift/origin-recycler
 #
 FROM openshift/origin
 
