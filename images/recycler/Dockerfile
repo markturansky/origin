@@ -9,7 +9,7 @@
 #
 FROM openshift/origin
 
-RUN yum install -y nfs-utils sudo
+RUN yum install -y sudo
 
 # Edit sudoers file
 # To avoid error: sudo: sorry, you must have a tty to run sudo
