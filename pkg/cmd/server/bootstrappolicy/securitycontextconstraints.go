@@ -19,8 +19,8 @@ const (
 	SecurityContextConstraintNonRootDesc = "nonroot provides all features of the restricted SCC but allows users to run with any non-root UID.  The user must specify the UID or it must be specified on the by the manifest of the container runtime."
 
 	// SecurityContextConstraintHostMountAndAnyUID is used as the name for the system default host mount + any UID scc.
-	SecurityContextConstraintHostMountAndAnyUID     = "hostmountanyuid"
-	SecurityContextConstraintHostMountAndAnyUIDDesc = "hostmount provides all the features of the restricted SCC but allows host mounts and any UID by a pod.  This is primarily used by the persistent volume recycler. WARNING: this SCC allows host file system access.  Grant with caution."
+	SecurityContextConstraintHostMountAndAnyUID     = "hostmount-anyuid"
+	SecurityContextConstraintHostMountAndAnyUIDDesc = "hostmount-anyuid provides all the features of the restricted SCC but allows host mounts and any UID by a pod.  This is primarily used by the persistent volume recycler. WARNING: this SCC allows host file system access as any UID, including UID 0.  Grant with caution."
 
 	// SecurityContextConstraintHostNS is used as the name for the system default scc
 	// that grants access to all host ns features.
@@ -133,7 +133,7 @@ func GetBootstrapSecurityContextConstraints(sccNameToAdditionalGroups map[string
 				// This strategy requires that annotations on the namespace which will be populated
 				// by the admission controller.  If namespaces are not annotated creating the strategy
 				// will fail.
-				Type: kapi.SELinuxStrategyRunAsAny,
+				Type: kapi.RunAsUserStrategyRunAsAny,
 			},
 			FSGroup: kapi.FSGroupStrategyOptions{
 				// This strategy requires that annotations on the namespace which will be populated

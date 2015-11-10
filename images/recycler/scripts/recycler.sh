@@ -35,14 +35,13 @@ find "${dir}" -type f -print0 | xargs -r -n 1 -0 bash -c 'recycle_file "$@"' {}
 function rm_all() {
     filename="${1}"
     uid=$(stat -c "#%u" "${filename}")
-    echo "rm_all '${filename}'"
     sudo -u "${uid}" rm -rf "${filename}"
 }
 export -f rm_all
 
 find "${dir}" ! -type d -print0 | xargs -r -n 1 -0 bash -c 'rm_all "$@"' {}
 
-find "${dir}" -mindepth 1 -type d -print0 | sort -z -k 1 -rg | xargs -r -n 1 -0 bash -c 'rm_all "$@"' {}
+find "${dir}" -mindepth 1 -type d -print0 | sort -zrg | xargs -r -n 1 -0 bash -c 'rm_all "$@"' {}
 
 echo "Scrub OK"
 exit 0
