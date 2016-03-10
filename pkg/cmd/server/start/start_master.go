@@ -17,12 +17,14 @@ import (
 
 	kerrors "k8s.io/kubernetes/pkg/api/errors"
 	"k8s.io/kubernetes/pkg/capabilities"
+	kclient "k8s.io/kubernetes/pkg/client/unversioned"
 	kcmdutil "k8s.io/kubernetes/pkg/kubectl/cmd/util"
 	kubelettypes "k8s.io/kubernetes/pkg/kubelet/types"
 
 	"github.com/openshift/origin/pkg/cmd/server/admin"
 	configapi "github.com/openshift/origin/pkg/cmd/server/api"
 	configapilatest "github.com/openshift/origin/pkg/cmd/server/api/latest"
+	osclient "github.com/openshift/origin/pkg/client"
 	"github.com/openshift/origin/pkg/cmd/server/api/validation"
 	"github.com/openshift/origin/pkg/cmd/server/bootstrappolicy"
 	"github.com/openshift/origin/pkg/cmd/server/etcd"
@@ -579,6 +581,14 @@ func startControllers(oc *origin.MasterConfig, kc *kubernetes.MasterConfig) erro
 		}
 		kc.RunEndpointController()
 		kc.RunNamespaceController()
+
+		config, err := kclient.InClusterConfig()
+		if err != nil {
+			glog.Fatalf("Error creating cluster config: %s", err)
+		}
+		osclient, err := osclient.New(config)
+
+		kc.RunThirdPartyAnalyticsController(kc.KubeClient, osclient)
 		kc.RunPersistentVolumeClaimBinder(binderClient)
 		kc.RunPersistentVolumeProvisioner(provisionerClient)
 		kc.RunPersistentVolumeClaimRecycler(oc.ImageFor("recycler"), recyclerClient, oc.Options.PolicyConfig.OpenShiftInfrastructureNamespace)

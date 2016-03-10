@@ -48,6 +48,7 @@ import (
 
 	osclient "github.com/openshift/origin/pkg/client"
 	configapi "github.com/openshift/origin/pkg/cmd/server/api"
+	oscontroller "github.com/openshift/origin/pkg/controller"
 )
 
 const (
@@ -93,6 +94,12 @@ func (c *MasterConfig) RunNamespaceController() {
 	namespaceController := namespacecontroller.NewNamespaceController(internalclientset.FromUnversionedClient(c.KubeClient), apiVersions, c.ControllerManager.NamespaceSyncPeriod)
 	go namespaceController.Run(c.ControllerManager.ConcurrentNamespaceSyncs, utilwait.NeverStop)
 }
+
+func (c *MasterConfig) RunThirdPartyAnalyticsController(kubeClient *client.Client, osClient osclient.Interface) {
+	ctrl := oscontroller.NewThirdPartyAnalyticsController(internalclientset.FromUnversionedClient(kubeClient), osClient)
+	ctrl.Run(utilwait.NeverStop, 1)
+}
+
 
 // RunPersistentVolumeClaimBinder starts the Kubernetes Persistent Volume Claim Binder
 func (c *MasterConfig) RunPersistentVolumeClaimBinder(client *client.Client) {
